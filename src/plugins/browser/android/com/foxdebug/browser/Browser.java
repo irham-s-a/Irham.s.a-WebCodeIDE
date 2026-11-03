@@ -49,6 +49,10 @@ import android.webkit.WebView;
 import android.widget.Toast;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.MimeTypeMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 
 
@@ -83,6 +87,7 @@ public class Browser extends LinearLayout {
   private boolean onlyConsole;
 
   ValueCallback<Uri[]> filePathCallback;
+  public WebDownloads downloads;
   final int REQUEST_SELECT_FILE = 1;
 
   public Browser(Context context, Ui.Theme theme, Boolean onlyConsole) {
@@ -159,43 +164,32 @@ public class Browser extends LinearLayout {
     webView.setBackgroundColor(0xFFFFFFFF);
 
 
-    webView.setDownloadListener(new DownloadListener() {
+    // v0.4.0: unduhan ditangani WebDownloads (http, data:, dan blob:).
+    downloads = new WebDownloads(context, webView);
+    webView.addJavascriptInterface(
+      downloads.bridge(),
+      WebDownloads.BRIDGE_NAME
+    );
+    webView.setDownloadListener(
+      new DownloadListener() {
         @Override
-        public void onDownloadStart(String url, String userAgent,
-                                    String contentDisposition, String mimeType,
-                                    long contentLength) {
-
-            String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
-
-            new Handler(Looper.getMainLooper()).post(() -> {
-
-              new AlertDialog.Builder(getContext())
-                .setTitle("Download file")
-                .setMessage("Do you want to download \"" + fileName + "\"?")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                    request.setMimeType(mimeType);
-                    request.addRequestHeader("User-Agent", userAgent);
-                    request.setDescription("Downloading file...");
-                    request.setTitle(fileName);
-                    request.allowScanningByMediaScanner();
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
-
-                    DownloadManager dm = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-                    dm.enqueue(request);
-
-                    Toast.makeText(getContext(), "Download started...", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-
-
-            });
-            
+        public void onDownloadStart(
+          String url,
+          String userAgent,
+          String contentDisposition,
+          String mimeType,
+          long contentLength
+        ) {
+          downloads.handle(
+            url,
+            userAgent,
+            contentDisposition,
+            mimeType,
+            contentLength
+          );
         }
-    });
-
+      }
+    );
 
     fitWebViewTo(0, 0, 1);
 
@@ -718,6 +712,7 @@ class BrowserChromeClient extends WebChromeClient {
     browser.setFavicon(icon);
   }
 
+  @Override
   public boolean onShowFileChooser(
     WebView webView,
     ValueCallback<Uri[]> filePathCallback,
@@ -728,32 +723,80 @@ class BrowserChromeClient extends WebChromeClient {
     }
     browser.filePathCallback = filePathCallback;
 
-    String[] acceptTypes = fileChooserParams.getAcceptTypes();
-    String mimeType = "*/*"; // default if empty or null
-    if (acceptTypes != null && acceptTypes.length > 0) {
-      String firstType = acceptTypes[0];
-      if (firstType != null && !firstType.trim().isEmpty()) {
-        mimeType = firstType;
+    try {
+      Activity activity = WebDownloads.findActivity(webView.getContext());
+      if (activity == null) {
+        throw new IllegalStateException(
+          "Activity untuk pemilih file tidak ditemukan"
+        );
+      }
+      Intent chooser = Intent.createChooser(
+        buildPickerIntent(fileChooserParams),
+        "Pilih file"
+      );
+      activity.startActivityForResult(chooser, browser.FILE_SELECT_CODE);
+    } catch (Throwable error) {
+      browser.filePathCallback = null;
+      filePathCallback.onReceiveValue(null);
+      WebDownloads.showErrorDialog(
+        browser.context,
+        "Gagal membuka pemilih file",
+        Log.getStackTraceString(error)
+      );
+    }
+    return true;
+  }
+
+  /**
+   * Membuat intent pemilih file dari atribut accept pada input file.
+   * Mendukung banyak tipe ("image/*,video/*"), ekstensi (".json,.png"),
+   * dan multiple.
+   */
+  private Intent buildPickerIntent(
+    WebChromeClient.FileChooserParams params
+  ) {
+    List<String> mimes = new ArrayList<>();
+    boolean unknown = false;
+    boolean hadExtension = false;
+    String[] accept = params.getAcceptTypes();
+    if (accept != null) {
+      for (String entry : accept) {
+        if (entry == null) continue;
+        for (String raw : entry.split(",")) {
+          String t = raw.trim().toLowerCase(Locale.ROOT);
+          if (t.isEmpty()) continue;
+          if (t.startsWith(".")) {
+            hadExtension = true;
+            String m = MimeTypeMap.getSingleton()
+              .getMimeTypeFromExtension(t.substring(1));
+            if (m == null) unknown = true; else if (!mimes.contains(m)) mimes.add(m);
+          } else if (t.contains("/")) {
+            if (!mimes.contains(t)) mimes.add(t);
+          }
+        }
       }
     }
-
-    Intent selectDocument = new Intent(Intent.ACTION_GET_CONTENT);
-    selectDocument.addCategory(Intent.CATEGORY_OPENABLE);
-    selectDocument.setType(mimeType);
-
-    boolean isMultiple =
-      (fileChooserParams.getMode() ==
-        WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE);
-    if (isMultiple) {
-      selectDocument.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+    if (hadExtension) {
+      // Banyak file manager menandai file kode sebagai tipe umum.
+      if (!mimes.contains("application/octet-stream")) mimes.add("application/octet-stream");
+      if (!mimes.contains("text/plain")) mimes.add("text/plain");
     }
 
-    ((Activity) webView.getContext()).startActivityForResult(
-        Intent.createChooser(selectDocument, "Select File"),
-        browser.FILE_SELECT_CODE
-      );
+    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+    if (mimes.isEmpty() || unknown) {
+      intent.setType("*/*");
+    } else if (mimes.size() == 1) {
+      intent.setType(mimes.get(0));
+    } else {
+      intent.setType("*/*");
+      intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.toArray(new String[0]));
+    }
 
-    return true;
+    if (params.getMode() == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE) {
+      intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+    }
+    return intent;
   }
 }
 
@@ -777,12 +820,14 @@ class BrowserWebViewClient extends WebViewClient {
   public void onPageStarted(WebView view, String url, Bitmap icon) {
     super.onPageStarted(view, url, icon);
     browser.setProgressBarVisible(true);
+    browser.downloads.injectHooks();
   }
 
   @Override
   public void onPageFinished(WebView view, String url) {
     super.onPageFinished(view, url);
     browser.setProgressBarVisible(false);
+    browser.downloads.injectHooks();
 
     // Inject console for external sites
     // this is not a good solution but for now its good, later we'll improve this

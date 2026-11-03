@@ -166,9 +166,18 @@ public class BrowserActivity extends Activity {
         return;
       }
 
-      browser.filePathCallback.onReceiveValue(
-        WebChromeClient.FileChooserParams.parseResult(resultCode, data)
-      );
+      try {
+        browser.filePathCallback.onReceiveValue(
+          WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+        );
+      } catch (Throwable error) {
+        browser.filePathCallback.onReceiveValue(null);
+        WebDownloads.showErrorDialog(
+          this,
+          "Gagal membaca file yang dipilih",
+          Log.getStackTraceString(error)
+        );
+      }
 
       browser.filePathCallback = null;
     }

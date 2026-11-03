@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tes input file dan download</title>
+<style>
+  body{font-family:system-ui,sans-serif;margin:0;padding:14px;background:#0b0f14;color:#d6f6ff}
+  h1{font-size:18px} h2{font-size:15px;margin:18px 0 6px;color:#33ff66}
+  button,input,a.btn{font-size:15px;padding:10px 12px;margin:4px 4px 4px 0;border-radius:8px;border:1px solid #1d3442;background:#101822;color:#d6f6ff;text-decoration:none;display:inline-block}
+  pre{background:#101822;border:1px solid #1d3442;border-radius:8px;padding:10px;white-space:pre-wrap;word-break:break-word;min-height:60px}
+</style>
+</head>
+<body>
+<h1>Tes input file dan download di preview</h1>
+
+<h2>A. Input file</h2>
+<div>1. Semua file: <input type="file" id="f1"></div>
+<div>2. Gambar saja: <input type="file" id="f2" accept="image/*"></div>
+<div>3. Ekstensi kode (.json,.js,.html,.css): <input type="file" id="f3" accept=".json,.js,.html,.css"></div>
+<div>4. Banyak file: <input type="file" id="f4" multiple></div>
+
+<h2>B. Download</h2>
+<button id="b-blob">Blob (JavaScript, a.download)</button>
+<button id="b-data">data: URL</button>
+<button id="b-big">Blob besar (3 MB)</button>
+<a class="btn" id="a-http" href="?unduh=1" download="halaman-ini.html">Link http (halaman ini)</a>
+
+<h2>Hasil</h2>
+<pre id="log">Belum ada aksi.</pre>
+
+<script>
+  const log = (m) => { const l = document.getElementById('log'); l.textContent = (l.textContent === 'Belum ada aksi.' ? '' : l.textContent + '\n') + m; };
+
+  for (const id of ['f1','f2','f3','f4']) {
+    document.getElementById(id).addEventListener('change', async (e) => {
+      const files = [...e.target.files];
+      if (!files.length) return log(id + ': tidak ada file dipilih');
+      for (const f of files) {
+        let preview = '';
+        if (f.size < 200000 && (f.type.startsWith('text/') || /\.(json|js|html|css)$/i.test(f.name))) {
+          preview = ' | isi awal: ' + JSON.stringify((await f.text()).slice(0, 40));
+        }
+        log(id + ': ' + f.name + ' (' + f.size + ' byte, ' + (f.type || 'tipe tidak diketahui') + ')' + preview);
+      }
+    });
+  }
+
+  function saveBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');   // sengaja tidak dipasang ke DOM, seperti kebanyakan library
+    a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  document.getElementById('b-blob').onclick = () => {
+    saveBlob(new Blob(['Halo dari blob!\nWaktu: ' + new Date().toISOString() + '\n'], {type: 'text/plain'}), 'tes-blob.txt');
+    log('Blob dikirim, tunggu dialog Simpan.');
+  };
+  document.getElementById('b-data').onclick = () => {
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('nama,nilai\nsatu,1\ndua,2\n');
+    a.download = 'tes-data.csv'; document.body.appendChild(a); a.click(); a.remove();
+    log('data: URL dikirim, tunggu dialog Simpan.');
+  };
+  document.getElementById('b-big').onclick = () => {
+    const bytes = new Uint8Array(3 * 1024 * 1024); for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
+    saveBlob(new Blob([bytes], {type: 'application/octet-stream'}), 'tes-besar.bin');
+    log('Blob 3 MB dikirim, ukuran asli 3145728 byte. Cek ukuran file hasil unduhan.');
+  };
+</script>
+</body>
+</html>

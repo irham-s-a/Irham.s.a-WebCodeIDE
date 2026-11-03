@@ -27,6 +27,7 @@
     <source-file src="android/com/foxdebug/browser/Browser.java" target-dir="src/com/foxdebug/browser"/>
     <source-file src="android/com/foxdebug/browser/BrowserActivity.java" target-dir="src/com/foxdebug/browser"/>
     <source-file src="android/com/foxdebug/browser/Emulator.java" target-dir="src/com/foxdebug/browser"/>
+    <source-file src="android/com/foxdebug/browser/WebDownloads.java" target-dir="src/com/foxdebug/browser"/>
     <source-file src="android/com/foxdebug/browser/Plugin.java" target-dir="src/com/foxdebug/browser"/>
     <source-file src="android/com/foxdebug/browser/Menu.java" target-dir="src/com/foxdebug/browser"/>
   </platform>

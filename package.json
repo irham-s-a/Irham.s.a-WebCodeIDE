@@ -1,7 +1,7 @@
 {
   "name": "com.irham.s.a.web.code.ide",
   "displayName": "Irham.s.a WebCode IDE",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Irham.s.a WebCode IDE - editor kode offline untuk Android (fork dari Acode, MIT)",
   "scripts": {
     "lang": "node ./utils/lang.js",
