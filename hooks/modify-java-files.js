@@ -1,8 +1,16 @@
 const path = require('path');
 const fs = require('fs');
+// Windows: perbaiki path wasm milik prettier-plugin-java sebelum plugin dimuat.
+require('./lib/win-path-fix').install();
 const prettier = require('prettier');
 
-main();
+// v0.4.2: Cordova harus MENUNGGU hook ini selesai. Dulu `main()` dipanggil tanpa
+// ditunggu, sehingga file Java ditulis belakangan dan menimpa patch hook
+// after_prepare (immersive-fullscreen.js) -> error "cannot find symbol
+// setFullscreenBackHandler" saat kompilasi di mesin yang lambat.
+module.exports = function modifyJavaFiles() {
+  return main();
+};
 
 async function main() {
   const patchVersion = '2';
@@ -428,32 +436,30 @@ async function main() {
     }
 
     newContent = await format(newContent);
-    fs.writeFile(files[file], newContent, err => {
-      if (err) {
-        console.log(err);
-        process.exit(1);
-      }
-
-      console.log(`${files[file]} updated`);
-    });
+    fs.writeFileSync(files[file], newContent);
+    console.log(`${files[file]} updated`);
   }
 
-  fs.writeFile(flagFile, patchVersion, err => {
-    if (err) {
-      console.log(err);
-      process.exit(1);
-    }
-
-    console.log(`${flagFile} updated`);
-  });
+  // Flag ditulis paling akhir, hanya jika semua file berhasil ditulis.
+  fs.writeFileSync(flagFile, patchVersion);
+  console.log(`${flagFile} updated`);
 
   async function format(content) {
-    return prettier.format(content, {
-      plugins: ['prettier-plugin-java'],
-      parser: 'java',
-      tabWidth: 2,
-      printWidth: Infinity
-    });
+    try {
+      return await prettier.format(content, {
+        plugins: ['prettier-plugin-java'],
+        parser: 'java',
+        tabWidth: 2,
+        printWidth: Infinity
+      });
+    } catch (error) {
+      console.error(
+        '\n[modify-java-files] Gagal memformat Java dengan prettier-plugin-java.\n' +
+          'Hook ini tidak boleh dilewati karena patch Java bergantung pada hasil format.\n' +
+          String((error && error.stack) || error)
+      );
+      throw error;
+    }
   }
 
   function getMethodString(method) {

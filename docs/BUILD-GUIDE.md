@@ -4,7 +4,7 @@ Panduan ini ditujukan untuk kamu dan agent AI di VS Code. Semua perintah dijalan
 
 - Nama aplikasi: **Irham.s.a WebCode IDE**
 - Package name: **com.irham.s.a.web.code.ide**
-- Versi saat ini: **0.4.0** (versionCode 4) — lihat `docs/versions/`
+- Versi saat ini: **0.4.2** (versionCode 6) — lihat `docs/versions/`
 
 > **Catatan jujur:** bundle JavaScript dan test sudah diuji saat paket ini dibuat (lihat bagian 9). Tahap Gradle/Android (APK) **belum bisa dijalankan** di lingkungan pembuatan paket ini karena tidak ada Android SDK. Jadi kalau Gradle menampilkan error, itu bahan untuk diagnosis di bagian 8, bukan berarti panduan ini salah total.
 
@@ -64,7 +64,7 @@ Proyek ini memakai **submodule** `codemirror-lsp-client`. Di zip yang kamu terim
 ```
 git init
 git add -A
-git commit -m "WebCode IDE v0.4.0"
+git commit -m "WebCode IDE v0.4.2"
 ```
 
 Folder `codemirror-lsp-client/` harus berisi file (ada `package.json` dan folder `dist/`). Kalau kosong, build akan gagal dengan error `Can't resolve '@codemirror/lsp-client'`. Perbaikannya: salin isi folder itu dari zip lagi, atau clone ulang dari https://github.com/Acode-Foundation/codemirror-lsp-client ke folder tersebut.
@@ -210,6 +210,9 @@ Lalu cocokkan pesan error dengan tabel ini:
 | Pesan error | Penyebab | Perbaikan |
 |---|---|---|
 | `Can't resolve '@codemirror/lsp-client'` | folder `codemirror-lsp-client/` kosong | isi folder (bagian 2), lalu `npm install --legacy-peer-deps` |
+| `ENOENT ... G:\G:\Projects\...\tree-sitter-java_orchard.wasm` (Windows) | bug `prettier-plugin-java`: path wasm diawali `/G:/` lalu dibaca sebagai `G:\G:\` | sudah diperbaiki di v0.4.1 (`hooks/lib/win-path-fix.js`). Pastikan file itu ada dan `hooks/modify-java-files.js` memanggil `require('./lib/win-path-fix').install()` |
+| `cannot find symbol ... setFullscreenBackHandler` / `setFullscreenOrientation` di `System.java` | hook `modify-java-files.js` menulis file Java terlambat dan menimpa patch `immersive-fullscreen.js` (balapan; sering terjadi di mesin yang lambat) | sudah diperbaiki di v0.4.2. Kalau platform dibuat dengan versi lama: `Remove-Item -Recurse -Force platforms,plugins` lalu `npm run setup` dan build ulang |
+| `Starting a Gradle Daemon, N busy Daemons could not be reused` dan build sangat lambat | banyak proses Gradle/Java lama masih hidup | `cd platforms\android; .\gradlew.bat --stop` (atau tutup Android Studio dan build lain), lalu ulangi |
 | `package com.foxdebug.acode does not exist` atau `cannot find symbol R` | masih ada import `com.foxdebug.acode.R` di file Java | ganti jadi `com.irham.s.a.web.code.ide.R`. Sudah diperbaiki di `AlpineDocumentProvider.java` dan `Menu.java`; cari lainnya dengan `grep -rn "foxdebug.acode.R" src/plugins platforms` |
 | `SDK location not found` | `ANDROID_HOME` belum diset | set variabel (bagian 1), atau buat `platforms/android/local.properties` berisi `sdk.dir=...` |
 | `Failed to find Platform SDK with path: platforms;android-36` | API 36 belum terpasang | `sdkmanager "platforms;android-36"` |
