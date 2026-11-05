@@ -601,16 +601,6 @@ function registerCoreCommands() {
 		run: () => adjustFontSize(-1),
 	});
 	addCommand({
-		name: "openPluginsPage",
-		description: "Open Plugins Page",
-		readOnly: true,
-		requiresView: false,
-		run() {
-			acode.exec("open", "plugins");
-			return true;
-		},
-	});
-	addCommand({
 		name: "openFileExplorer",
 		description: "File Explorer",
 		readOnly: true,
@@ -647,16 +637,6 @@ function registerCoreCommands() {
 		requiresView: false,
 		run() {
 			acode.exec("change-editor-theme");
-			return true;
-		},
-	});
-	addCommand({
-		name: "openTerminal",
-		description: "Open Terminal",
-		readOnly: true,
-		requiresView: false,
-		run() {
-			acode.exec("new-terminal");
 			return true;
 		},
 	});

@@ -375,7 +375,7 @@ function showSftpMigrationReport({
 
 	alert(
 		"Some SFTP connections were removed",
-		`Acode could not move ${failures.length} saved SFTP connection${failures.length === 1 ? "" : "s"} into encrypted storage. The affected connection data and ${removedReferences} saved reference${removedReferences === 1 ? " were" : "s were"} removed so Acode could start safely. Please add the connection${failures.length === 1 ? "" : "s"} again.<br><br>${details}${recoveryMessage}`,
+		`WebCode IDE could not move ${failures.length} saved SFTP connection${failures.length === 1 ? "" : "s"} into encrypted storage. The affected connection data and ${removedReferences} saved reference${removedReferences === 1 ? " were" : "s were"} removed so Acode could start safely. Please add the connection${failures.length === 1 ? "" : "s"} again.<br><br>${details}${recoveryMessage}`,
 	);
 }
 
@@ -408,12 +408,17 @@ async function setDebugInfo() {
 			? ` (minimum supported: ${minWebviewMajor})`
 			: "";
 
-	const info = [
-		`App: v${version} (${versionCode})`,
-		`Android: ${androidVersion}`,
-		`WebView: ${webviewVersion}${webviewStatus}`,
-		`Language: ${language}`,
-	].join("\n");
+	// v0.5.0: layar pembuka hanya menampilkan merek. Info teknis (Android,
+	// WebView, bahasa) baru ditampilkan kalau WebView terlalu lama, karena itu
+	// satu-satunya saat informasi tersebut dibutuhkan.
+	const info = webviewStatus
+		? [
+				`WebCode IDE v${version} (${versionCode})`,
+				`Android: ${androidVersion}`,
+				`WebView: ${webviewVersion}${webviewStatus}`,
+				`Language: ${language}`,
+			].join("\n")
+		: `Irham.s.a WebCode IDE\nv${version} (${versionCode})`;
 
 	document.body.setAttribute("data-version", info);
 }
@@ -436,7 +441,7 @@ async function loadApp() {
 	);
 	const $header = tile({
 		type: "header",
-		text: "Acode",
+		text: "WebCode IDE",
 		lead: $navToggler,
 		tail: $menuToggler,
 	});
@@ -584,17 +589,6 @@ async function loadApp() {
 
 	acode.exec("save-state");
 	initFileList();
-
-	import(/* webpackChunkName: "terminal" */ "components/terminal").then(
-		({ TerminalManager }) => {
-			TerminalManager.restorePersistedSessions().catch((error) => {
-				console.error("Terminal restoration failed:", error);
-			});
-		},
-		(error) => {
-			console.error("Failed to load terminal module:", error);
-		},
-	);
 
 	/**
 	 *

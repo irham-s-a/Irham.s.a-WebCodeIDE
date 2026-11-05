@@ -32,7 +32,7 @@ export default function () {
 	);
 	const list = new Ref();
 	let cmPreview = null;
-	const previewDoc = `// Acode is awesome!\nconst message = "Welcome to Acode";\nconsole.log(message);`;
+	const previewDoc = `// WebCode IDE siap dipakai!\nconst message = "Halo dari WebCode IDE";\nconsole.log(message);`;
 
 	function destroyPreview(context) {
 		if (!cmPreview) return;
@@ -268,7 +268,7 @@ export default function () {
 					<span style={`color:${theme.foreground};`}>@</span>
 					<span style={`color:${theme.blue};`}>acode</span>
 					<span style={`color:${theme.foreground};`}>:~$ </span>
-					<span>echo "Hello, Acode!"</span>
+					<span>echo "Halo, WebCode IDE!"</span>
 				</div>
 				<div className="terminal-line terminal-output">Hello, Acode!</div>
 				<div className="terminal-line terminal-prompt">
@@ -350,7 +350,7 @@ export default function () {
 		if (!ok) {
 			alert(
 				"Invalid theme",
-				"This editor theme is not compatible with Acode's CodeMirror runtime.",
+				"This editor theme is not compatible with the WebCode IDE CodeMirror runtime.",
 			);
 			return;
 		}

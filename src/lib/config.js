@@ -35,7 +35,7 @@ const config = {
 		"platinum",
 		"titanium",
 	]),
-	LOG_FILE_NAME: "Acode.log",
+	LOG_FILE_NAME: "WebCode.log",
 
 	// Social Links
 	DOCS_URL: "https://docs.acode.app",

@@ -666,6 +666,15 @@ const irhamPaper = createIrhamUiTheme({
 	buttonText: "rgb(255, 255, 255)", error: "rgb(192, 57, 43)", danger: "rgb(192, 57, 43)",
 });
 
+const irhamNight = createIrhamUiTheme({
+	name: "WebCode Night", type: "dark", editor: "webcode_night", terminal: "dark",
+	darkened: "rgb(7, 12, 22)", primary: "rgb(11, 18, 32)", text: "rgb(215, 227, 244)",
+	secondary: "rgb(16, 26, 44)", secondaryText: "rgb(122, 142, 176)",
+	active: "rgb(46, 230, 166)", link: "rgb(90, 209, 255)",
+	border: "rgba(46, 230, 166, 0.22)", popup: "rgb(16, 26, 44)",
+	buttonText: "rgb(7, 12, 22)", error: "rgb(255, 199, 119)", danger: "rgb(255, 83, 112)",
+});
+
 const custom = createBuiltInTheme("Custom");
 custom.autoDarkened = true;
 
@@ -693,6 +702,7 @@ export default [
 	mint,
 	sandstone,
 	blossom,
+	irhamNight,
 	irhamHacker,
 	irhamMatrix,
 	irhamCyber,

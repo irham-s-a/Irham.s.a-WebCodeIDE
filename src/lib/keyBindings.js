@@ -372,12 +372,6 @@ const APP_BINDING_CONFIG = [
 		readOnly: true,
 	},
 	{
-		name: "openPluginsPage",
-		description: "Open plugins page",
-		key: "Ctrl-Shift-X",
-		readOnly: true,
-	},
-	{
 		name: "openFileExplorer",
 		description: "Open file explorer",
 		key: "Ctrl-Shift-E",
@@ -402,13 +396,6 @@ const APP_BINDING_CONFIG = [
 		description: "Change editor theme",
 		key: null,
 		action: "change-editor-theme",
-		readOnly: true,
-	},
-	{
-		name: "openTerminal",
-		description: "Open terminal",
-		key: "Ctrl-`",
-		action: "new-terminal",
 		readOnly: true,
 	},
 	{

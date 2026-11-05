@@ -1,11 +1,12 @@
 {
   "name": "com.irham.s.a.web.code.ide",
   "displayName": "Irham.s.a WebCode IDE",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Irham.s.a WebCode IDE - editor kode offline untuk Android (fork dari Acode, MIT)",
   "scripts": {
     "lang": "node ./utils/lang.js",
     "build": "sh utils/scripts/build.sh",
+    "build_vscode": "bash utils/scripts/build.sh",
     "build:admob": "npm ci --prefix src/plugins/admob --no-audit --no-fund && npm run build --prefix src/plugins/admob",
     "start": "sh utils/scripts/start.sh",
     "dev": "node utils/scripts/dev.js",
@@ -31,9 +32,7 @@
     "plugins": {
       "cordova-clipboard": {},
       "cordova-plugin-device": {},
-      "cordova-plugin-file": {
-        "ANDROIDX_WEBKIT_VERSION": "1.4.0"
-      },
+      "cordova-plugin-file": {},
       "cordova-plugin-server": {},
       "cordova-plugin-ftp": {},
       "cordova-plugin-sdcard": {},

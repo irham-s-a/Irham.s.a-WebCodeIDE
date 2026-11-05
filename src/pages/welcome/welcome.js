@@ -1,181 +1,126 @@
-import { getResolvedKeyBindings } from "cm/commandRegistry";
 import logoSrc from "components/logo/logo.png?inline";
-import config from "lib/config";
 import EditorFile from "lib/editorFile";
 
 /**
- * Opens the Welcome tab as an EditorFile page
+ * Irham.s.a WebCode IDE (v0.5.0) - halaman beranda.
+ * Tata letak dasbor: kartu hero, kisi aksi cepat, dan daftar alat.
+ * Tidak ada tautan online, terminal, atau plugin.
  */
 export default function openWelcomeTab() {
-	// Check if welcome tab is already open
 	const existingFile = editorManager.files.find((f) => f.id === "welcome-tab");
 	if (existingFile) {
 		existingFile.makeActive();
 		return;
 	}
 
-	const welcomeContent = createWelcomeContent();
-
-	const welcomeFile = new EditorFile("Welcome", {
+	const welcomeFile = new EditorFile("Beranda", {
 		id: "welcome-tab",
 		render: true,
 		type: "page",
-		content: welcomeContent,
+		content: createWelcomeContent(),
 		tabIcon: "icon acode",
 		hideQuickTools: true,
 	});
 
-	// Set custom subtitle for the header
-	welcomeFile.setCustomTitle(() => "Get Started");
+	welcomeFile.setCustomTitle(() => "Mulai");
 }
 
-/**
- * Creates the welcome tab content
- * @returns {HTMLElement}
- */
 function createWelcomeContent() {
-	const bindings = getResolvedKeyBindings();
-	const kb = (name) => {
-		const binding = bindings[name];
-		return binding?.key ? binding.key.split("|")[0].replace(/-/g, "+") : "";
-	};
-
 	return (
 		<div id="welcome-tab" className="welcome-page scroll">
-			{/* Hero Section */}
-			<header className="welcome-header">
-				<img className="logo" src={logoSrc} width="48" height="48" alt="" />
-				<div className="welcome-header-text">
-					<h1>Welcome to Acode</h1>
-					<p className="tagline">Powerful code editor for Android</p>
-				</div>
-			</header>
+			<section className="wc-hero">
+				<div className="wc-hero-glow"></div>
+				<img className="wc-hero-logo" src={logoSrc} width="72" height="72" alt="" />
+				<h1>Irham.s.a WebCode IDE</h1>
+				<p className="wc-hero-tagline">Editor kode offline untuk Android</p>
+				<span className="wc-chip">
+					v{BuildInfo.version} · {BuildInfo.versionCode}
+				</span>
+			</section>
 
-			{/* Get Started Section */}
-			<section className="welcome-section">
-				<h2 className="section-label">GET STARTED</h2>
-				<div className="action-list">
-					<ActionRow
+			<section className="wc-block">
+				<h2 className="wc-label">Mulai cepat</h2>
+				<div className="wc-grid">
+					<Tile
+						tone="green"
 						icon="add"
-						label={strings["new file"]}
-						shortcut={kb("newFile")}
+						title={strings["new file"]}
 						onClick={() => acode.exec("new-file")}
 					/>
-					<ActionRow
+					<Tile
+						tone="cyan"
 						icon="document-text-outline"
-						label={strings["open file"]}
-						shortcut={kb("openFile")}
+						title={strings["open file"]}
 						onClick={() => acode.exec("open-file")}
 					/>
-					<ActionRow
+					<Tile
+						tone="amber"
 						icon="folder_open"
-						label={strings["open folder"]}
-						shortcut={kb("openFolder")}
+						title={strings["open folder"]}
 						onClick={() => acode.exec("open-folder")}
 					/>
-					<ActionRow
-						icon="terminal"
-						label={strings.terminal}
-						shortcut={kb("openTerminal")}
-						onClick={() => acode.exec("new-terminal")}
-					/>
-					<ActionRow
+					<Tile
+						tone="violet"
 						icon="historyrestore"
-						label={strings.recent}
+						title={strings.recent}
 						onClick={() => acode.exec("recent")}
 					/>
-					<ActionRow
+				</div>
+			</section>
+
+			<section className="wc-block">
+				<h2 className="wc-label">Alat</h2>
+				<div className="wc-list">
+					<Row
 						icon="tune"
-						label={strings["command palette"]}
-						shortcut={kb("openCommandPalette")}
+						title={strings["command palette"]}
+						subtitle="Cari dan jalankan perintah"
 						onClick={() => acode.exec("command-palette")}
 					/>
-				</div>
-			</section>
-
-			{/* Configure Section */}
-			<section className="welcome-section">
-				<h2 className="section-label">CONFIGURE</h2>
-				<div className="action-list">
-					<ActionRow
-						icon="settings"
-						label={strings.settings}
-						onClick={() => acode.exec("open", "settings")}
-					/>
-					<ActionRow
+					<Row
 						icon="color_lenspalette"
-						label={strings["change theme"]}
+						title={strings["change theme"]}
+						subtitle="Hacker, Cyber, Terminal, dan lainnya"
 						onClick={() => acode.exec("change-app-theme")}
 					/>
-					<ActionRow
-						icon="extension"
-						label={strings.explore + " " + strings.plugins}
-						onClick={() => acode.exec("open", "plugins")}
+					<Row
+						icon="settings"
+						title={strings.settings}
+						subtitle="Editor, pratinjau, dan tampilan"
+						onClick={() => acode.exec("open", "settings")}
 					/>
-				</div>
-			</section>
-
-			{/* Learn Section */}
-			<section className="welcome-section">
-				<h2 className="section-label">LEARN</h2>
-				<div className="action-list">
-					<ActionRow
-						icon="help"
-						label={strings.help}
-						onClick={() => acode.exec("open", "help")}
-					/>
-					<ActionRow
+					<Row
 						icon="info_outline"
-						label={strings.about}
+						title={strings.about}
+						subtitle="Pengembang dan lisensi"
 						onClick={() => acode.exec("open", "about")}
 					/>
 				</div>
 			</section>
 
-			{/* Links Section */}
-			<section className="welcome-section welcome-links">
-				<h2 className="section-label">CONNECT</h2>
-				<div className="link-row">
-					<LinkItem icon="acode" label="Website" url={config.BASE_URL} />
-					<LinkItem icon="github" label="GitHub" url={config.GITHUB_URL} />
-					<LinkItem
-						icon="telegram"
-						label="Telegram"
-						url={config.TELEGRAM_URL}
-					/>
-					<LinkItem icon="discord" label="Discord" url={config.DISCORD_URL} />
-				</div>
-			</section>
+			<div className="wc-foot">Dibuat oleh Irham Satria Alfitra</div>
 		</div>
 	);
 }
 
-/**
- * Action row component
- */
-function ActionRow({ icon, label, shortcut, onClick }) {
+function Tile({ tone, icon, title, onClick }) {
 	return (
-		<div className="action-row" onclick={onClick}>
+		<div className={`wc-tile tone-${tone}`} onclick={onClick}>
 			<span className={`icon ${icon}`}></span>
-			<span className="action-label">{label}</span>
-			{shortcut && <span className="action-shortcut">{shortcut}</span>}
+			<span className="wc-tile-title">{title}</span>
 		</div>
 	);
 }
 
-/**
- * Link item component - opens URL in external browser
- */
-function LinkItem({ icon, label, url }) {
-	const handleClick = (e) => {
-		e.preventDefault();
-		system.openInBrowser(url);
-	};
-
+function Row({ icon, title, subtitle, onClick }) {
 	return (
-		<a href={url} className="link-item" onclick={handleClick}>
+		<div className="wc-row" onclick={onClick}>
 			<span className={`icon ${icon}`}></span>
-			<span>{label}</span>
-		</a>
+			<div className="wc-row-text">
+				<span className="wc-row-title">{title}</span>
+				<span className="wc-row-sub">{subtitle}</span>
+			</div>
+			<span className="icon keyboard_arrow_right"></span>
+		</div>
 	);
 }

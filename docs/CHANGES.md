@@ -4,6 +4,7 @@ Fork pribadi **Irham.s.a WebCode IDE**. Daftar versi, dari yang terbaru:
 
 | Versi | Nama | Ringkasan | Dokumen |
 |---|---|---|---|
+| 0.5.0 | Rombak | desain baru, terminal/login/plugin dibuang dari antarmuka, tema bawaan baru | `versions/v0.5.0.md` |
 | 0.4.2 | Perbaikan urutan hook | hook Java ditunggu Cordova; patch fullscreen tidak lagi tertimpa | `versions/v0.4.2.md` |
 | 0.4.1 | Perbaikan build Windows | hook Java tidak lagi gagal `ENOENT G:\G:\...wasm` | `versions/v0.4.1.md` |
 | 0.4.0 | Preview | input file dan download di preview berjalan di dalam app | `versions/v0.4.0.md` |

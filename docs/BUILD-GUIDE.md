@@ -4,7 +4,7 @@ Panduan ini ditujukan untuk kamu dan agent AI di VS Code. Semua perintah dijalan
 
 - Nama aplikasi: **Irham.s.a WebCode IDE**
 - Package name: **com.irham.s.a.web.code.ide**
-- Versi saat ini: **0.4.2** (versionCode 6) — lihat `docs/versions/`
+- Versi saat ini: **0.5.0** (versionCode 7) — lihat `docs/versions/`
 
 > **Catatan jujur:** bundle JavaScript dan test sudah diuji saat paket ini dibuat (lihat bagian 9). Tahap Gradle/Android (APK) **belum bisa dijalankan** di lingkungan pembuatan paket ini karena tidak ada Android SDK. Jadi kalau Gradle menampilkan error, itu bahan untuk diagnosis di bagian 8, bukan berarti panduan ini salah total.
 
@@ -64,7 +64,7 @@ Proyek ini memakai **submodule** `codemirror-lsp-client`. Di zip yang kamu terim
 ```
 git init
 git add -A
-git commit -m "WebCode IDE v0.4.2"
+git commit -m "WebCode IDE v0.5.0"
 ```
 
 Folder `codemirror-lsp-client/` harus berisi file (ada `package.json` dan folder `dist/`). Kalau kosong, build akan gagal dengan error `Can't resolve '@codemirror/lsp-client'`. Perbaikannya: salin isi folder itu dari zip lagi, atau clone ulang dari https://github.com/Acode-Foundation/codemirror-lsp-client ke folder tersebut.

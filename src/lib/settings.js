@@ -1,7 +1,6 @@
 import fsOperation from "fileSystem";
 import ThemeBuilder from "theme/builder";
 import themes from "theme/list";
-import { getSystemEditorTheme } from "theme/preInstalled";
 import helpers from "utils/helpers";
 import Url from "utils/Url";
 import config from "./config";
@@ -235,10 +234,13 @@ class Settings {
 		if (this.#initialized) return;
 		this.settingsFile = Url.join(DATA_STORAGE, "settings.json");
 
-		this.#defaultSettings.appTheme = "system";
-		this.#defaultSettings.editorTheme = getSystemEditorTheme(
-			isDeviceDarkTheme(),
-		);
+		// WebCode IDE: tema bawaan sendiri, bukan tema sistem Acode.
+		this.#defaultSettings.appTheme = isDeviceDarkTheme()
+			? "webcode night"
+			: "paper";
+		this.#defaultSettings.editorTheme = isDeviceDarkTheme()
+			? "webcode_night"
+			: "paper_light";
 
 		this.#initialized = true;
 

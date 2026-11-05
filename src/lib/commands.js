@@ -804,23 +804,6 @@ Additional Info:
 				toast("Failed to get device info");
 			});
 	},
-	async "new-terminal"() {
-		try {
-			const { TerminalManager } = await import(
-				/* webpackChunkName: "terminal" */ "components/terminal"
-			);
-			await TerminalManager.createServerTerminal();
-		} catch (error) {
-			console.error("Failed to create terminal:", error);
-			window.toast("Failed to create terminal");
-		}
-	},
-	async "running-processes"() {
-		const { default: RunningProcesses } = await import(
-			"pages/runningProcesses"
-		);
-		RunningProcesses();
-	},
 	async welcome() {
 		const { default: openWelcomeTab } = await import(
 			/* webpackChunkName: "welcome" */ "pages/welcome/welcome"

@@ -6,6 +6,7 @@
 @use "./styles/markdown.scss";
 @use "./styles/codemirror.scss";
 @use "./styles/notification.scss";
+@use "./styles/webcode-ui.scss";
 
 :root {
   --scrollbar-width: 4px;

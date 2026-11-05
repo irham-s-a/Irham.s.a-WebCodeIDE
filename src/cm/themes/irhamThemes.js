@@ -15,6 +15,36 @@ import { memberProperty } from "../highlightTags";
  * Semua warna memakai format hex.
  */
 export const irhamThemeConfigs = [
+	{
+		name: "webcode_night",
+		caption: "WebCode Night",
+		dark: true,
+		background: "#0b1220",
+		foreground: "#d7e3f4",
+		selection: "#16365a",
+		cursor: "#2ee6a6",
+		dropdownBackground: "#101a2c",
+		dropdownBorder: "#1d2c47",
+		activeLine: "#2ee6a614",
+		lineNumber: "#47597a",
+		lineNumberActive: "#2ee6a6",
+		matchingBracket: "#1b4a52",
+		keyword: "#2ee6a6",
+		storage: "#2ee6a6",
+		variable: "#d7e3f4",
+		parameter: "#ffc777",
+		function: "#5ad1ff",
+		memberProperty: "#9ec7ff",
+		string: "#c3e88d",
+		constant: "#ff9e64",
+		type: "#5ad1ff",
+		class: "#ffc777",
+		number: "#ff9e64",
+		comment: "#4f6485",
+		heading: "#2ee6a6",
+		invalid: "#ff5370",
+		regexp: "#7fdbca",
+	},
 	// ---------- Kategori: Terminal / Hacker / Cyber ----------
 	{
 		name: "hacker_green",
