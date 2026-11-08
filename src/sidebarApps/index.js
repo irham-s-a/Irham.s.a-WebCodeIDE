@@ -150,7 +150,9 @@ function ensureActiveApp() {
  */
 function get(id) {
 	const app = apps.find((app) => app.id === id);
-	return app.container;
+	// v0.5.1: panel yang sudah dibuang (mis. notifikasi) mengembalikan
+	// undefined, bukan melempar error saat startup.
+	return app?.container;
 }
 
 /**

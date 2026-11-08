@@ -105,7 +105,10 @@ function getTabsRelativeToFile(side, referenceFile) {
 }
 
 async function closeTabs(files, options = {}) {
-	const closableFiles = files.filter((file) => file && !file.pinned);
+	// v0.7.0: tab Beranda permanen, tidak pernah ikut ditutup.
+	const closableFiles = files.filter(
+		(file) => file && !file.pinned && file.id !== "welcome-tab",
+	);
 	if (!closableFiles.length) return false;
 
 	const {

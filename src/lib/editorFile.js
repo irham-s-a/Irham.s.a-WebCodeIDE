@@ -663,12 +663,16 @@ export default class EditorFile {
 					<span className={this.icon} style={{ paddingRight: "5px" }}></span>
 				),
 			}),
-			tail: tag("span", {
-				className: "icon cancel",
-				dataset: {
-					action: "close-file",
-				},
-			}),
+			// Tab Beranda permanen: tanpa tombol tutup.
+			tail:
+				this.#id === "welcome-tab"
+					? tag("span")
+					: tag("span", {
+							className: "icon cancel",
+							dataset: {
+								action: "close-file",
+							},
+						}),
 		});
 
 		const editable =
@@ -1359,6 +1363,8 @@ export default class EditorFile {
 	 * @param {boolean} force if true, will prompt to save the file
 	 */
 	async remove(force = false, options = {}) {
+		// v0.7.0: tab Beranda permanen; tidak bisa ditutup dengan cara apa pun.
+		if (this.id === "welcome-tab") return false;
 		const {
 			ignorePinned = false,
 			silentPinned = false,
@@ -2085,6 +2091,7 @@ export default class EditorFile {
 	}
 
 	#createTabTail() {
+		if (this.#id === "welcome-tab") return tag("span");
 		if (!this.#pinned) {
 			return tag("span", {
 				className: "icon cancel",

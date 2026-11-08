@@ -1,0 +1,20 @@
+WebCode IDE v0.6.0 - PEMBARUAN (bukan paket penuh)
+
+1. Ekstrak zip ini ke ROOT proyek dan timpa file yang sama.
+2. Zip tidak bisa menghapus file. Hapus folder plugin lama secara manual
+   (PowerShell, dari root proyek):
+
+   cd platforms\android; .\gradlew.bat --stop; cd ..\..
+   Remove-Item -Recurse -Force platforms, plugins
+   Remove-Item -Recurse -Force src\plugins\terminal, src\plugins\auth, src\plugins\pluginContext, src\plugins\ftp, src\plugins\sftp, src\plugins\iap, src\plugins\proot
+   Remove-Item src\plugins\system\android\com\foxdebug\system\RewardPassManager.java
+
+   (Git Bash: rm -rf platforms plugins src/plugins/{terminal,auth,pluginContext,ftp,sftp,iap,proot} src/plugins/system/android/com/foxdebug/system/RewardPassManager.java)
+
+3. Pasang ulang dan build:
+
+   npm install --legacy-peer-deps
+   npm run setup
+   npm run build -- paid d fdroid apk
+
+Rincian: docs/versions/v0.6.0.md

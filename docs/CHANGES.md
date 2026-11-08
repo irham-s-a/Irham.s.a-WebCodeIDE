@@ -4,6 +4,9 @@ Fork pribadi **Irham.s.a WebCode IDE**. Daftar versi, dari yang terbaru:
 
 | Versi | Nama | Ringkasan | Dokumen |
 |---|---|---|---|
+| 0.7.0 | Kembali ke atas + play melayang | header kembali ke atas, play melayang di kanan, drawer dari kiri dengan folder di atas, Beranda permanen, default editor 11px + bungkus baris | `versions/v0.7.0.md` |
+| 0.6.0 | Rel kanan + pembersihan native | top bar jadi rel vertikal kanan, drawer menempel, tab di atas, plugin native tak terpakai dibuang | `versions/v0.6.0.md` |
+| 0.5.1 | Perbaikan Beranda + tata letak | Beranda muncul lagi, warna aktif diperbaiki, rel ikon drawer di bawah, tab di bawah, header kapsul | `versions/v0.5.1.md` |
 | 0.5.0 | Rombak | desain baru, terminal/login/plugin dibuang dari antarmuka, tema bawaan baru | `versions/v0.5.0.md` |
 | 0.4.2 | Perbaikan urutan hook | hook Java ditunggu Cordova; patch fullscreen tidak lagi tertimpa | `versions/v0.4.2.md` |
 | 0.4.1 | Perbaikan build Windows | hook Java tidak lagi gagal `ENOENT G:\G:\...wasm` | `versions/v0.4.1.md` |

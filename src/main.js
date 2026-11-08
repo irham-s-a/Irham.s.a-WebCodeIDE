@@ -29,8 +29,6 @@ import Sidebar from "components/sidebar";
 import tile from "components/tile";
 import toast from "components/toast";
 import { initIconTooltips } from "components/tooltip";
-import alert from "dialogs/alert";
-import confirm from "dialogs/confirm";
 import intentHandler, { processPendingIntents } from "handlers/intent";
 import keyboardHandler, { keydownState } from "handlers/keyboard";
 import quickToolsInit from "handlers/quickToolsInit";
@@ -42,7 +40,6 @@ import applySettings from "lib/applySettings";
 import checkFiles from "lib/checkFiles";
 import { canSaveFile } from "lib/commands";
 import config from "lib/config";
-import EditorFile from "lib/editorFile";
 import EditorManager from "lib/editorManager";
 import fileIcons from "lib/fileIcons";
 import { initFileList } from "lib/fileList";
@@ -54,7 +51,6 @@ import openFolder, { addedFolder } from "lib/openFolder";
 import { registerPrettierFormatter } from "lib/registerPrettierFormatter";
 import restoreFiles from "lib/restoreFiles";
 import settings from "lib/settings";
-import { migrateLegacySftpProfiles } from "lib/sftpProfiles";
 import mustache from "mustache";
 import themes from "theme/list";
 import { initHighlighting } from "utils/codeHighlight";
@@ -291,17 +287,6 @@ async function onDeviceReady() {
 	acode.setLoadingMessage("Loading language...");
 	await lang.set(settings.value.lang);
 
-	acode.setLoadingMessage("Securing SFTP profiles...");
-	const sftpMigration = await migrateLegacySftpProfiles();
-	if (sftpMigration.failures.length) {
-		for (const failure of sftpMigration.failures) {
-			logger.log(
-				"error",
-				`SFTP profile migration failed for ${failure.username}@${failure.hostname}: ${failure.message}`,
-			);
-		}
-	}
-
 	if (settings.value.developerMode) {
 		try {
 			const devTools = (await import("lib/devTools")).default;
@@ -313,9 +298,6 @@ async function onDeviceReady() {
 
 	try {
 		await loadApp();
-		if (sftpMigration.failures.length) {
-			showSftpMigrationReport(sftpMigration);
-		}
 	} catch (error) {
 		window.log("error", error);
 		toast(`Error: ${error.message}`);
@@ -356,36 +338,6 @@ async function onDeviceReady() {
 
 		}, 500);
 	}
-}
-
-function showSftpMigrationReport({
-	failures,
-	removedReferences,
-	recoveredFiles,
-}) {
-	const details = failures
-		.map(
-			({ username, hostname, message }) =>
-				`${escapeHtml(username)}@${escapeHtml(hostname)}: ${escapeHtml(message)}`,
-		)
-		.join("<br>");
-	const recoveryMessage = recoveredFiles
-		? `<br><br>${recoveredFiles} unsaved remote file${recoveredFiles === 1 ? " was" : "s were"} kept as a recovery tab.`
-		: "";
-
-	alert(
-		"Some SFTP connections were removed",
-		`WebCode IDE could not move ${failures.length} saved SFTP connection${failures.length === 1 ? "" : "s"} into encrypted storage. The affected connection data and ${removedReferences} saved reference${removedReferences === 1 ? " were" : "s were"} removed so Acode could start safely. Please add the connection${failures.length === 1 ? "" : "s"} again.<br><br>${details}${recoveryMessage}`,
-	);
-}
-
-function escapeHtml(value) {
-	return String(value)
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;")
-		.replaceAll("'", "&#039;");
 }
 
 async function setDebugInfo() {
@@ -550,7 +502,9 @@ async function loadApp() {
 	notificationManager.init();
 	window.log("info", "Started app and its services...");
 
-	if (!files.length) {
+	// v0.7.0: tab Beranda permanen. Selalu dibuka lebih dulu; berkas yang
+	// dipulihkan sesudahnya tetap menjadi tab aktif.
+	{
 		const { default: openWelcomeTab } = await import(
 			/* webpackChunkName: "welcome" */ "pages/welcome"
 		);
@@ -642,7 +596,10 @@ async function loadApp() {
 		try {
 			const { serverPort, previewPort } = settings.value;
 			let canRun = false;
-			if (serverPort !== previewPort) {
+			// v0.7.0: Beranda bukan berkas yang bisa dijalankan.
+			if (editorManager.activeFile?.id === "welcome-tab") {
+				canRun = false;
+			} else if (serverPort !== previewPort) {
 				canRun = true;
 			} else {
 				const { activeFile } = editorManager;

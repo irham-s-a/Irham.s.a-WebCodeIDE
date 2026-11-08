@@ -6,12 +6,18 @@
 // ============================================================================
 
 :root {
+  --wc-footer: 0px; // tinggi dok tombol keyboard (diisi aturan di bawah)
   --wc-radius-lg: 22px;
   --wc-radius-md: 16px;
   --wc-radius-sm: 12px;
   --wc-line: color-mix(in srgb, var(--primary-text-color) 11%, transparent);
   --wc-glow: color-mix(in srgb, var(--active-color) 40%, transparent);
 }
+
+// Tinggi dok tombol keyboard mengikuti atribut footer-height pada halaman utama.
+:root:has(wc-page#root[footer-height="1"]) { --wc-footer: 40px; }
+:root:has(wc-page#root[footer-height="2"]) { --wc-footer: 80px; }
+:root:has(wc-page#root[footer-height="3"]) { --wc-footer: 120px; }
 
 // ---- Ikon merek: ganti glyph Acode dengan logo WebCode ---------------------
 // (dipakai pada tab Beranda dan tempat lain yang memakai ikon "acode")
@@ -29,24 +35,63 @@
 }
 
 body {
-  // ---- Header: transparan dengan garis cahaya di bawah ----------------------
-  wc-page#root > header.tile,
-  wc-page > header.tile {
-    box-shadow: none !important;
-    border-bottom: 1px solid var(--wc-line);
-    background-image: linear-gradient(180deg, color-mix(in srgb, var(--active-color) 7%, transparent), transparent);
-    position: relative;
+  // ===========================================================================
+  // TATA LETAK (v0.7.0)
+  // Header kembali ke atas dengan urutan asli: hamburger, nama file + path,
+  // pensil, titik tiga. Tombol play/pratinjau dilepas dari header dan
+  // mengambang menempel di tepi kanan. Drawer muncul dari kiri.
+  // Mode layar penuh (fullscreen) memakai aturan bawaan.
+  // ===========================================================================
 
-    &::after {
+  // ---- Header: kapsul melayang (ukuran kotak tetap, hanya tampilan) ---------
+  &:not(.fullscreen-mode) wc-page#root > header.tile {
+    position: relative;
+    isolation: isolate;
+    box-shadow: none !important;
+    background: transparent !important;
+
+    &::before {
       content: "";
       position: absolute;
-      left: 14%;
-      right: 14%;
-      bottom: -1px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--active-color), transparent);
-      opacity: 0.55;
-      pointer-events: none;
+      z-index: -1;
+      inset: 4px 8px;
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--primary-color) 78%, var(--active-color) 7%);
+      border: 1px solid var(--wc-line);
+      box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.55);
+    }
+
+    .text .title {
+      letter-spacing: 0.2px;
+    }
+
+    // Tombol play/pratinjau: mengambang di tepi kanan, di atas dok tombol
+    // keyboard. Elemennya tetap anak header, jadi logika tampil/sembunyinya
+    // (hanya untuk berkas yang bisa dijalankan, tidak di Beranda) tidak berubah.
+    > [action="run"] {
+      position: fixed;
+      top: auto;
+      left: auto;
+      right: 0;
+      bottom: calc(var(--wc-footer) + 28px);
+      z-index: 90;
+      width: 50px;
+      height: 48px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em !important;
+      color: var(--active-color);
+      border-radius: 24px 0 0 24px;
+      border: 1px solid var(--wc-line);
+      border-right: none;
+      background: color-mix(in srgb, var(--primary-color) 86%, var(--active-color) 10%);
+      box-shadow: -8px 6px 22px -10px rgba(0, 0, 0, 0.6);
+
+      &:active {
+        background: color-mix(in srgb, var(--primary-color) 70%, var(--active-color) 24%);
+      }
     }
   }
 
@@ -73,30 +118,99 @@ body {
     }
   }
 
-  // ---- Sidebar: sudut membulat, rel ikon berbentuk kapsul --------------------
-  #sidebar {
-    &.phone {
-      border-radius: 0 28px 28px 0;
-      box-shadow: 8px 0 30px -6px rgba(0, 0, 0, 0.55);
-    }
+  // ---- Drawer (ponsel): dari kiri; baris ikon tab di atas, isi di bawahnya --
+  &:not(.fullscreen-mode) #sidebar.phone {
+    flex-direction: column;
+    border-radius: 0 28px 28px 0;
+    box-shadow: 10px 0 34px -8px rgba(0, 0, 0, 0.6);
 
-    .apps {
-      margin: 10px 0 10px 8px;
-      height: calc(100% - 20px);
-      width: 48px;
-      min-width: 48px;
-      border-radius: 24px;
+    > .apps {
+      order: 0;
+      flex: 0 0 auto;
+      width: auto;
+      min-width: 0;
+      height: 52px;
+      margin: 8px 10px 4px;
+      flex-direction: row;
+      border-radius: 20px;
       background-color: color-mix(in srgb, var(--primary-text-color) 7%, transparent);
       border: 1px solid var(--wc-line);
 
       .app-icons-container {
-        padding: 10px 0;
-        gap: 8px;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0 8px;
+        gap: 6px;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+
+      .app-icons-container .icon {
+        margin: 0;
+        flex: 0 0 auto;
+
+        // indikator aktif: titik di bawah ikon, bukan batang di kiri
+        &::after {
+          left: 50%;
+          top: auto;
+          bottom: 3px;
+          width: 14px;
+          height: 3px;
+          border-radius: 2px;
+          transform: translateX(-50%) scaleX(0);
+        }
+
+        &.active::after {
+          transform: translateX(-50%) scaleX(1);
+        }
       }
     }
 
-    .container {
-      border-radius: 22px 0 0 22px;
+    // Isi (pohon folder) mulai dari ATAS, tepat di bawah baris ikon.
+    > .container {
+      order: 1;
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 0;
+      border-radius: 0 0 28px 0;
+    }
+
+    // Batang geser lebar hanya untuk tablet; di ponsel ia ikut masuk ke alur
+    // kolom dan mendorong pohon folder ke bawah.
+    > .resize-bar {
+      display: none;
+    }
+  }
+
+  // Warna aktif/hover rel ikon mengikuti aksen tema (bukan overlay putih tetap),
+  // supaya terbaca di tema gelap maupun terang dan ikon tidak menyatu dengan latar.
+  #sidebar .apps .app-icons-container .icon {
+    &:hover {
+      background-color: color-mix(in srgb, var(--active-color) 12%, transparent);
+    }
+
+    &.active {
+      color: var(--active-color);
+      background-color: color-mix(in srgb, var(--active-color) 20%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--active-color) 38%, transparent);
+
+      &::after {
+        background-color: var(--active-color);
+      }
+    }
+  }
+
+  // ---- Dok tombol keyboard: tombol berbentuk chip, lebar penuh --------------
+  wc-page#root > footer {
+    .button-container {
+      gap: 3px;
+      padding: 4px 6px;
+      box-sizing: border-box;
+    }
+
+    .button-container > * {
+      border-radius: 12px;
     }
   }
 
@@ -169,13 +283,6 @@ body {
         }
       }
     }
-  }
-
-  // ---- Dok alat cepat (tombol bantu keyboard) --------------------------------
-  wc-page#root > footer {
-    border-radius: 20px 20px 0 0;
-    border-top: 1px solid var(--wc-line);
-    box-shadow: 0 -10px 30px -12px rgba(0, 0, 0, 0.5);
   }
 
   // ---- Splash web: pesan bawah lebih rapi ------------------------------------

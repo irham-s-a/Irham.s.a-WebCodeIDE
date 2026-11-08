@@ -550,6 +550,11 @@ blossom.preferredTerminalTheme = "light";
  * Irham.s.a WebCode IDE: pabrik tema UI ringkas (v0.2.0).
  * Menghasilkan tema aplikasi dari beberapa warna utama.
  */
+function translucent(color, alpha) {
+	const m = String(color).match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+	return m ? `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})` : color;
+}
+
 function createIrhamUiTheme(spec) {
 	const t = createBuiltInTheme(spec.name, spec.type);
 	t.darkenedPrimaryColor = spec.darkened;
@@ -558,7 +563,10 @@ function createIrhamUiTheme(spec) {
 	t.secondaryColor = spec.secondary;
 	t.secondaryTextColor = spec.secondaryText;
 	t.activeColor = spec.active;
-	t.activeIconColor = spec.activeIcon || spec.active;
+	// --active-icon-color dipakai sebagai LATAR item aktif/hover di banyak panel
+	// (simbol, referensi, LSP). Harus transparan, bukan warna aksen penuh,
+	// supaya teks/ikon aksen di atasnya tetap terbaca.
+	t.activeIconColor = spec.activeIcon || translucent(spec.active, 0.2);
 	t.linkTextColor = spec.link || spec.active;
 	t.borderColor = spec.border;
 	t.popupIconColor = spec.text;

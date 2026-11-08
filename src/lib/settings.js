@@ -129,7 +129,8 @@ class Settings {
 			search: this.#searchSettings,
 			lang: "en-us",
 			uiZoom: 100,
-			fontSize: "12px",
+			// WebCode IDE v0.7.0: teks editor lebih kecil dan baris panjang membungkus.
+			fontSize: "11px",
 			cursorWidth: 2,
 			editorTheme: "one_dark",
 			editorRenderer: "dom",
@@ -138,7 +139,7 @@ class Settings {
 			stickyScroll: false,
 			stickyScrollMaxLines: 5,
 			cursorBlinkRate: 1200,
-			textWrap: false,
+			textWrap: true,
 			wrappingIndent: "same",
 			softTab: true,
 			tabSize: 2,
@@ -147,7 +148,11 @@ class Settings {
 			formatOnSave: false,
 			fadeFoldWidgets: false,
 			autoCorrect: true,
+			// WebCode IDE: tab berkas di atas layar; top bar menjadi rel di kanan.
 			openFileListPos: this.OPEN_FILE_LIST_POS_HEADER,
+			wcLayoutV1: true,
+			wcLayoutV2: true,
+			wcEditorDefaultsV1: true,
 			quickTools: 2,
 			quickToolsTriggerMode: this.QUICKTOOLS_TRIGGER_MODE_TOUCH,
 			appFont: "",
@@ -265,6 +270,29 @@ class Settings {
 			)
 				settings.lineHeight = 1.4;
 
+			// WebCode IDE v0.6.0: tata letak rel kanan. Sekali saja, kembalikan tab
+			// dari bawah (v0.5.1) ke atas layar. Pilihan pengguna sesudahnya
+			// tidak diubah lagi.
+			let layoutMigrated = false;
+			if (settings.wcLayoutV2 !== true) {
+				if (settings.openFileListPos === this.OPEN_FILE_LIST_POS_BOTTOM) {
+					settings.openFileListPos = this.OPEN_FILE_LIST_POS_HEADER;
+				}
+				settings.wcLayoutV1 = true;
+				settings.wcLayoutV2 = true;
+				layoutMigrated = true;
+			}
+
+			// WebCode IDE v0.7.0: default editor baru (11px, bungkus baris) juga
+			// diterapkan SEKALI pada pemasangan lama. Setelah itu pilihan pengguna
+			// tidak diubah lagi.
+			if (settings.wcEditorDefaultsV1 !== true) {
+				settings.fontSize = "11px";
+				settings.textWrap = true;
+				settings.wcEditorDefaultsV1 = true;
+				layoutMigrated = true;
+			}
+
 			// make sure that all the settings are present
 			Object.keys(this.#defaultSettings).forEach((setting) => {
 				const value = settings[setting];
@@ -278,6 +306,7 @@ class Settings {
 
 			this.value = structuredClone(settings);
 			this.#oldSettings = structuredClone(settings);
+			if (layoutMigrated) await this.#save();
 			try {
 				themes.update(ThemeBuilder.fromJSON(this.value.customTheme));
 			} catch (error) {
